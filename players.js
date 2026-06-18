@@ -1,7 +1,7 @@
 // Shared story data. Coordinates use [longitude, latitude], the order MapLibre expects.
 // Edit this file to change players, stops, landmark text, route colors, or photos.
-// Player portraits use Wikimedia Commons file redirects so GitHub Pages can
-// serve the story without bundling large local image files.
+// Player portraits use local files so the published story always shows the
+// exact photos chosen for this project.
 window.FINAL_GENERATION_DATA = {
   finalVenue: {
     id: "metlife",
@@ -19,7 +19,7 @@ window.FINAL_GENERATION_DATA = {
       shortName: "Messi",
       country: "Argentina",
       color: "#0072ce",
-      photo: "https://commons.wikimedia.org/wiki/Special:FilePath/2026_Lionel_Messi_(cropped).jpg",
+      photo: "./assets/players/Messi.jpg",
       photoCredit: {
         title: "2026 Lionel Messi (cropped).jpg",
         author: "The White House / Daniel Torok",
@@ -82,7 +82,7 @@ window.FINAL_GENERATION_DATA = {
       shortName: "Ronaldo",
       country: "Portugal",
       color: "#c1121f",
-      photo: "https://commons.wikimedia.org/wiki/Special:FilePath/2025_Cristiano_Ronaldo_(cropped).jpg",
+      photo: "./assets/players/Ronaldo.webp",
       photoCredit: {
         title: "2025 Cristiano Ronaldo (cropped).jpg",
         author: "The White House / Daniel Torok",
@@ -157,7 +157,7 @@ window.FINAL_GENERATION_DATA = {
       shortName: "Neymar",
       country: "Brazil",
       color: "#d99000",
-      photo: "https://commons.wikimedia.org/wiki/Special:FilePath/Neymar_Jr._with_Al_Hilal,_3_October_2023_-_01_(cropped).jpg",
+      photo: "./assets/players/Neymar.jpg",
       photoCredit: {
         title: "Neymar Jr. with Al Hilal, 3 October 2023 - 01 (cropped).jpg",
         author: "Moghaddam Madadi / Tasnim News Agency",
@@ -226,7 +226,7 @@ window.FINAL_GENERATION_DATA = {
       shortName: "Modri\u0107",
       country: "Croatia",
       color: "#ffffff",
-      photo: "https://commons.wikimedia.org/wiki/Special:FilePath/Ofrenda_de_la_Liga_y_la_Champions-57-L.Mill%C3%A1n_(52109310843)_(Luka_Modri%C4%87).jpg",
+      photo: "./assets/players/Modric.jpg",
       photoCredit: {
         title: "Ofrenda de la Liga y la Champions-57-L.Millan (52109310843) (Luka Modric).jpg",
         author: "Fotografias Archimadrid.es",
