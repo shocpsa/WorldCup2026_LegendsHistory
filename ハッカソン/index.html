@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A cinematic MapLibre GL JS storytelling map following four football legends toward the 2026 World Cup final."
+    />
+    <title>The Final Generation | One Last World Cup</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main id="app">
+      <div id="map" aria-label="3D football storytelling map"></div>
+
+      <section id="opening-card" class="title-card" aria-live="polite">
+        <p class="kicker">2026 World Cup Stories</p>
+        <h1>The Final Generation</h1>
+        <p class="subtitle">One Last World Cup</p>
+        <p class="subtitle-ja">最後のワールドカップへ</p>
+      </section>
+
+      <section class="story-panel" aria-live="polite">
+        <p id="scene-count" class="scene-count">Scene 1 / 14</p>
+        <h2 id="panel-title">The Final Generation</h2>
+        <article id="player-card" class="player-card" hidden>
+          <img id="player-photo" class="player-photo" src="" alt="" />
+          <div class="player-card-content">
+            <p id="player-country" class="player-country"></p>
+            <p id="player-role" class="player-role"></p>
+          </div>
+          <div class="player-facts" aria-label="Player story facts">
+            <p>
+              <span>Legacy</span>
+              <strong id="player-highlight"></strong>
+            </p>
+            <p>
+              <span>Route</span>
+              <strong id="player-route"></strong>
+            </p>
+          </div>
+          <p id="player-credit" class="player-credit"></p>
+        </article>
+        <p id="panel-meta" class="panel-meta">Opening | Earth from space</p>
+        <p id="panel-copy" class="panel-copy">
+          Press Start to follow four legends toward one final World Cup horizon.
+          4人のレジェンドが最後になるかもしれないワールドカップへ向かう物語です。
+        </p>
+      </section>
+
+      <div class="controls" aria-label="Story controls">
+        <button id="start-button" type="button">Start / 開始</button>
+        <button id="replay-button" type="button">Replay / もう一度</button>
+      </div>
+
+      <div id="status-pill" class="status-pill">Loading</div>
+      <div id="blackout" class="blackout" aria-hidden="true"></div>
+
+      <section id="final-card" class="final-card" aria-live="polite" aria-label="Final title">
+        <p class="kicker">2026</p>
+        <h2>The Last Dance Begins</h2>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
+    <script src="./data/players.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
