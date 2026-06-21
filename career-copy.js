@@ -14,8 +14,8 @@
       ja: "CDナシオナル、スポルティングCP、マンチェスター・ユナイテッド、レアル・マドリード、ユヴェントス、アル・ナスル。挑戦を続けた道のりです。"
     },
     "neymar-route": {
-      en: "Santos FC, FC Barcelona, Paris Saint-Germain, and Al Hilal trace the path of Brazil's modern star.",
-      ja: "サントスFC、FCバルセロナ、パリ・サンジェルマン、アル・ヒラル。ブラジルの現代的スターの軌跡です。"
+      en: "Santos FC, FC Barcelona, Paris Saint-Germain, Al Hilal, and Santos FC again trace the path of Brazil's modern star.",
+      ja: "サントスFC、FCバルセロナ、パリ・サンジェルマン、アル・ヒラル、そして再びサントスFCへ。ブラジルの現代的スターの軌跡です。"
     },
     "modric-route": {
       en: "NK Zadar, Dinamo Zagreb, Tottenham Hotspur, Real Madrid, and AC Milan chart the path of Croatia's midfield standard.",
@@ -37,4 +37,12 @@
       );
     }
   });
+
+  const finalConvergence = scenes.find((scene) => scene.id === "final-convergence");
+  if (finalConvergence) {
+    finalConvergence.description = bilingualLine(
+      "Nu Stadium, Al-Awwal Park, Vila Belmiro, and San Siro launch their final lines toward New Jersey together.",
+      "Nu Stadium、Al-Awwal Park、Vila Belmiro、San Siroから、4本の線が同時にニュージャージーへ向かいます。"
+    );
+  }
 })();
