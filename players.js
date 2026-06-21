@@ -1,7 +1,7 @@
 // Shared story data. Coordinates use [longitude, latitude], the order MapLibre expects.
 // Edit this file to change players, stops, landmark text, route colors, or photos.
-// Player portraits use local files so the published story always shows the
-// exact photos chosen for this project.
+// Player portraits use verified Wikimedia Commons files or local copies with
+// matching source and license credits.
 window.FINAL_GENERATION_DATA = {
   finalVenue: {
     id: "metlife",
@@ -19,14 +19,14 @@ window.FINAL_GENERATION_DATA = {
       shortName: "Messi",
       country: "Argentina",
       color: "#0072ce",
-      photo: "./assets/players/Messi.jpg?v=4",
+      photo: "https://upload.wikimedia.org/wikipedia/commons/b/b4/Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg",
       photoCredit: {
-        title: "2026 Lionel Messi (cropped).jpg",
-        author: "The White House / Daniel Torok",
-        source: "https://commons.wikimedia.org/wiki/File:2026_Lionel_Messi_(cropped).jpg",
-        license: "Public Domain Mark 1.0",
-        licenseUrl: "https://creativecommons.org/publicdomain/mark/1.0/",
-        note: "Cropped on Wikimedia Commons; displayed cropped."
+        title: "Lionel-Messi-Argentina-2022-FIFA-World-Cup (cropped).jpg",
+        author: "Hossein Zohrevand / Tasnim News Agency",
+        source: "https://commons.wikimedia.org/wiki/File:Lionel-Messi-Argentina-2022-FIFA-World-Cup_(cropped).jpg",
+        license: "CC BY 4.0",
+        licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+        note: "Loaded from Wikimedia Commons."
       },
       card: {
         countryJa: "アルゼンチン",
@@ -82,14 +82,14 @@ window.FINAL_GENERATION_DATA = {
       shortName: "Ronaldo",
       country: "Portugal",
       color: "#c1121f",
-      photo: "./assets/players/Ronaldo.webp?v=4",
+      photo: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Cristiano_Ronaldo_WC2022_-_01_%28cropped%29.jpg",
       photoCredit: {
-        title: "2025 Cristiano Ronaldo (cropped).jpg",
-        author: "The White House / Daniel Torok",
-        source: "https://commons.wikimedia.org/wiki/File:2025_Cristiano_Ronaldo_(cropped).jpg",
-        license: "Public Domain Mark 1.0",
-        licenseUrl: "https://creativecommons.org/publicdomain/mark/1.0/",
-        note: "Cropped on Wikimedia Commons; displayed cropped."
+        title: "Cristiano Ronaldo WC2022 - 01 (cropped).jpg",
+        author: "Hossein Zohrevand / Tasnim News Agency",
+        source: "https://commons.wikimedia.org/wiki/File:Cristiano_Ronaldo_WC2022_-_01_(cropped).jpg",
+        license: "CC BY 4.0",
+        licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+        note: "Loaded from Wikimedia Commons."
       },
       card: {
         countryJa: "ポルトガル",
@@ -159,12 +159,12 @@ window.FINAL_GENERATION_DATA = {
       color: "#d99000",
       photo: "./assets/players/Neymar.jpg?v=4",
       photoCredit: {
-        title: "Neymar Jr. with Al Hilal, 3 October 2023 - 01 (cropped).jpg",
-        author: "Moghaddam Madadi / Tasnim News Agency",
-        source: "https://commons.wikimedia.org/wiki/File:Neymar_Jr._with_Al_Hilal,_3_October_2023_-_01_(cropped).jpg",
-        license: "CC BY 4.0",
-        licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
-        note: "Cropped on Wikimedia Commons; displayed cropped."
+        title: "Bra-Cos (1).jpg",
+        author: "Kirill Venediktov / soccer.ru",
+        source: "https://commons.wikimedia.org/wiki/File:Bra-Cos_(1).jpg",
+        license: "CC BY-SA 3.0",
+        licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
+        note: "Local copy of the Wikimedia Commons file."
       },
       card: {
         countryJa: "ブラジル",
@@ -228,12 +228,12 @@ window.FINAL_GENERATION_DATA = {
       color: "#ffffff",
       photo: "./assets/players/Modric.jpg?v=4",
       photoCredit: {
-        title: "Ofrenda de la Liga y la Champions-57-L.Millan (52109310843) (Luka Modric).jpg",
-        author: "Fotografias Archimadrid.es",
-        source: "https://commons.wikimedia.org/wiki/File:Ofrenda_de_la_Liga_y_la_Champions-57-L.Mill%C3%A1n_(52109310843)_(Luka_Modri%C4%87).jpg",
-        license: "CC BY 2.0",
-        licenseUrl: "https://creativecommons.org/licenses/by/2.0/",
-        note: "Cropped on Wikimedia Commons; displayed cropped."
+        title: "Modric World Cup 2018.jpg",
+        author: "Svetlana Beketova / soccer.ru",
+        source: "https://commons.wikimedia.org/wiki/File:Modri%C4%87_World_Cup_2018.jpg",
+        license: "CC BY-SA 3.0",
+        licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
+        note: "Resized local copy of the Wikimedia Commons file."
       },
       card: {
         countryJa: "クロアチア",
