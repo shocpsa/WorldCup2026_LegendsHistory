@@ -15,6 +15,7 @@ const els = {
   playerCredit: document.querySelector("#player-credit"),
   panelMeta: document.querySelector("#panel-meta"),
   panelCopy: document.querySelector("#panel-copy"),
+  sceneTrack: document.querySelector("#scene-track"),
   status: document.querySelector("#status-pill"),
   opening: document.querySelector("#opening-card"),
   blackout: document.querySelector("#blackout"),
@@ -32,6 +33,9 @@ const ROUTE_COMPLETE_HOLD = 2800;
 const CONVERGENCE_HOLD = 3400;
 const NETWORK_HOLD = 4500;
 const FINAL_STADIUM_HOLD = 5200;
+const MAP_IDLE_TIMEOUT = 1800;
+const BUILDING_LAYER_ID = "world-cup-3d-buildings";
+const BUILDING_VISIBILITY_ZOOM = 13;
 
 const CLEAR_BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 
@@ -46,6 +50,9 @@ const initialCamera = {
 let activePopup = null;
 let animationFrame = null;
 let isPlaying = false;
+let playbackToken = 0;
+let jumpToken = 0;
+let currentSceneIndex = 0;
 
 els.start.disabled = true;
 els.replay.disabled = true;
@@ -66,6 +73,7 @@ map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-lef
 
 map.on("load", () => {
   prepareMapLayers();
+  buildSceneNav();
   resetStory();
   updatePanel(scenes[0], 0);
   setStatus("Ready");
@@ -75,6 +83,101 @@ map.on("load", () => {
 
 els.start.addEventListener("click", () => playStory());
 els.replay.addEventListener("click", () => playStory());
+
+function buildSceneNav() {
+  els.sceneTrack.innerHTML = "";
+
+  scenes.forEach((scene, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "scene-jump";
+    button.textContent = String(index + 1);
+    button.title = `${index + 1}. ${scene.title}`;
+    button.setAttribute("aria-label", `Go to scene ${index + 1}: ${scene.title}`);
+    button.addEventListener("click", () => jumpToScene(index));
+    els.sceneTrack.append(button);
+  });
+
+  updateSceneNav(0);
+}
+
+function updateSceneNav(index) {
+  currentSceneIndex = index;
+
+  Array.from(els.sceneTrack.children).forEach((button, buttonIndex) => {
+    const isActive = buttonIndex === index;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-current", isActive ? "step" : "false");
+  });
+}
+
+function stopPlayback() {
+  playbackToken += 1;
+  isPlaying = false;
+
+  if (animationFrame) {
+    cancelAnimationFrame(animationFrame);
+    animationFrame = null;
+  }
+
+  map.stop();
+  els.start.disabled = false;
+  els.replay.disabled = false;
+}
+
+async function jumpToScene(index) {
+  stopPlayback();
+  const token = ++jumpToken;
+  const scene = scenes[index];
+
+  resetStory();
+  prepareRoutesForScene(index);
+  updatePanel(scene, index);
+  applySceneChrome(scene);
+  closePopup();
+  setStatus(`Scene ${index + 1}`);
+
+  if (scene.fadeToBlack || scene.finalText) {
+    els.blackout.classList.add("is-visible");
+  }
+
+  await flyToCameraAndSettle({
+    ...scene.camera,
+    duration: Math.min(scene.camera.duration || 0, 1800),
+    curve: 1.08
+  });
+
+  if (token !== jumpToken || isPlaying || currentSceneIndex !== index) return;
+  showStaticScenePopup(scene);
+}
+
+function prepareRoutesForScene(targetIndex) {
+  resetLines();
+
+  for (let index = 0; index <= targetIndex; index += 1) {
+    const scene = scenes[index];
+
+    if (scene.routeAnimation) {
+      setSourceLine(scene.routeAnimation.sourceId, scene.routeAnimation.coordinates, 100);
+    }
+
+    if (scene.convergenceAnimation) {
+      players.forEach((player) => {
+        setSourceLine(convergenceSourceId(player.id), finalApproachCoordinates(player), 100);
+      });
+    }
+
+    if (["full-network", "final-stadium", "fade-to-black", "last-dance"].includes(scene.id)) {
+      revealFullNetwork();
+    }
+  }
+}
+
+function showStaticScenePopup(scene) {
+  const popup = scene.popupAfterAnimation || scene.popup;
+  if (!popup || scene.finalText) return;
+  showPopup(popup.coordinates, popup.title, popup.description);
+}
 
 function prepareMapLayers() {
   // The basemap stays readable, while the globe fog keeps the space opening cinematic.
@@ -148,16 +251,17 @@ function tryAdd3DBuildings() {
   const style = map.getStyle();
   const hasOpenMapTiles = Boolean(style.sources.openmaptiles);
 
-  if (!hasOpenMapTiles || map.getLayer("world-cup-3d-buildings")) return;
+  if (!hasOpenMapTiles || map.getLayer(BUILDING_LAYER_ID)) return;
 
   // At close zoom levels, building extrusions make the pitched camera feel
   // meaningfully 3D around city and stadium scenes.
   map.addLayer({
-    id: "world-cup-3d-buildings",
+    id: BUILDING_LAYER_ID,
     source: "openmaptiles",
     "source-layer": "building",
     type: "fill-extrusion",
     minzoom: 13,
+    layout: { visibility: "none" },
     paint: {
       "fill-extrusion-color": [
         "interpolate",
@@ -440,6 +544,7 @@ function updatePanel(scene, index) {
   els.panelTitle.textContent = scene.title;
   els.panelMeta.textContent = scene.meta;
   els.panelCopy.textContent = scene.description;
+  updateSceneNav(index);
 
   if (scene.player) {
     renderPlayerCard(scene.player);
@@ -565,6 +670,41 @@ function flyToCamera(camera) {
       essential: true
     });
   });
+}
+
+function waitForMapIdle(timeout = MAP_IDLE_TIMEOUT) {
+  return new Promise((resolve) => {
+    if (map.loaded() && (!map.areTilesLoaded || map.areTilesLoaded())) {
+      resolve();
+      return;
+    }
+
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+
+    map.once("idle", finish);
+    window.setTimeout(finish, timeout);
+  });
+}
+
+async function flyToCameraAndSettle(camera) {
+  set3DBuildingsForCamera(camera);
+  await flyToCamera(camera);
+  await waitForMapIdle(camera.idleTimeout || MAP_IDLE_TIMEOUT);
+}
+
+function set3DBuildingsForCamera(camera) {
+  if (!map.getLayer(BUILDING_LAYER_ID)) return;
+
+  const shouldShow =
+    (camera.zoom ?? map.getZoom()) >= BUILDING_VISIBILITY_ZOOM &&
+    (camera.pitch ?? map.getPitch()) >= 55;
+
+  map.setLayoutProperty(BUILDING_LAYER_ID, "visibility", shouldShow ? "visible" : "none");
 }
 
 function wait(ms) {
@@ -722,6 +862,7 @@ function easeInOutCubic(value) {
 async function playStory() {
   if (isPlaying) return;
 
+  const token = ++playbackToken;
   isPlaying = true;
   els.start.disabled = true;
   els.replay.disabled = true;
@@ -730,6 +871,8 @@ async function playStory() {
   resetStory();
 
   for (let index = 0; index < scenes.length; index += 1) {
+    if (!isPlaybackActive(token)) return;
+
     const scene = scenes[index];
     updatePanel(scene, index);
     applySceneChrome(scene);
@@ -737,7 +880,8 @@ async function playStory() {
     setStatus(`Scene ${index + 1}`);
 
     if (scene.before) scene.before();
-    await flyToCamera(scene.camera);
+    await flyToCameraAndSettle(scene.camera);
+    if (!isPlaybackActive(token)) return;
 
     if (scene.popup && !scene.popupAfterAnimation) {
       showPopup(scene.popup.coordinates, scene.popup.title, scene.popup.description);
@@ -745,26 +889,33 @@ async function playStory() {
 
     if (scene.routeAnimation) {
       await wait(scene.preAnimationHold || 400);
+      if (!isPlaybackActive(token)) return;
       await animateRoute(
         scene.routeAnimation.sourceId,
         scene.routeAnimation.coordinates,
         scene.routeAnimation.duration,
         scene.routeAnimation.label
       );
+      if (!isPlaybackActive(token)) return;
     }
 
     if (scene.convergenceAnimation) {
       await wait(scene.preAnimationHold || 500);
+      if (!isPlaybackActive(token)) return;
       await animateConvergence(scene.convergenceAnimation.duration);
+      if (!isPlaybackActive(token)) return;
     }
 
     if (scene.stadiumTour) {
       await playStadiumTour(scene.stadiumTour);
+      if (!isPlaybackActive(token)) return;
     }
 
     if (scene.afterAnimationCamera && !scene.stadiumTour) {
       await wait(350);
-      await flyToCamera(scene.afterAnimationCamera);
+      if (!isPlaybackActive(token)) return;
+      await flyToCameraAndSettle(scene.afterAnimationCamera);
+      if (!isPlaybackActive(token)) return;
     }
 
     if (scene.popupAfterAnimation) {
@@ -784,6 +935,7 @@ async function playStory() {
     }
 
     await wait(scene.hold ?? DEFAULT_HOLD);
+    if (!isPlaybackActive(token)) return;
   }
 
   isPlaying = false;
@@ -792,11 +944,15 @@ async function playStory() {
   setStatus("Complete");
 }
 
+function isPlaybackActive(token) {
+  return isPlaying && token === playbackToken;
+}
+
 async function playStadiumTour(stops) {
   for (let index = 0; index < stops.length; index += 1) {
     const stop = stops[index];
     setStatus(`Stadium ${index + 1} / ${stops.length}`);
-    await flyToCamera({
+    await flyToCameraAndSettle({
       center: stop.coordinates,
       zoom: stop.zoom || 15.35,
       pitch: stop.pitch || 76,
@@ -851,8 +1007,8 @@ function routeScene(player, orderTitle, camera, description, descriptionJa, fina
       coordinates: finalStop.coordinates,
       title: `${player.name} route complete`,
       description: bilingual(
-        `${player.route[0].name} to ${destinationName(finalStop)}.`,
-        `${player.route[0].name}から${destinationName(finalStop)}までの道のりです。`
+        `Career route: ${player.routeLabel}.`,
+        `キャリアルート：${player.routeLabelJa}`
       )
     },
     afterAnimationCamera: {
@@ -936,8 +1092,8 @@ const scenes = [
     messi,
     "Messi Route",
     { center: [-35, 19], zoom: 2.18, pitch: 52, bearing: -32, duration: 4800 },
-    "Rosario, Barcelona, Paris, and Miami form the arc of a career that changed football.",
-    "ロサリオからバルセロナ、パリ、マイアミへ。サッカー史を変えたキャリアの軌跡です。",
+    "Newell's Old Boys, FC Barcelona, Paris Saint-Germain, and Inter Miami CF form the arc of a career that changed football.",
+    "ニューウェルズ・オールドボーイズ、FCバルセロナ、パリ・サンジェルマン、インテル・マイアミCF。サッカー史を変えたキャリアの軌跡です。",
     { zoom: 13.9, pitch: 75, bearing: -54 }
   ),
 
@@ -953,8 +1109,8 @@ const scenes = [
     ronaldo,
     "Ronaldo Route",
     { center: [13, 39], zoom: 2.25, pitch: 52, bearing: 20, duration: 5000 },
-    "From Madeira to Lisbon, Manchester, Madrid, Turin, and Riyadh, the route keeps expanding.",
-    "マデイラからリスボン、マンチェスター、マドリード、トリノ、リヤドへ。挑戦を続けた道のりです。",
+    "CD Nacional, Sporting CP, Manchester United, Real Madrid, Juventus, and Al Nassr trace a career built on constant reinvention.",
+    "CDナシオナル、スポルティングCP、マンチェスター・ユナイテッド、レアル・マドリード、ユヴェントス、アル・ナスル。挑戦を続けた道のりです。",
     { zoom: 13.6, pitch: 75, bearing: 38 }
   ),
 
@@ -970,8 +1126,8 @@ const scenes = [
     neymar,
     "Neymar Route",
     { center: [-11, 12], zoom: 2.08, pitch: 52, bearing: -18, duration: 5000 },
-    "Mogi das Cruzes, Santos, Barcelona, Paris, and Riyadh trace the path of Brazil's modern star.",
-    "モジ・ダス・クルーゼス、サントス、バルセロナ、パリ、リヤド。ブラジルの現代的スターの軌跡です。",
+    "Santos FC, FC Barcelona, Paris Saint-Germain, Al Hilal, and Santos FC again trace the path of Brazil's modern star.",
+    "サントスFC、FCバルセロナ、パリ・サンジェルマン、アル・ヒラル、そして再びサントスFCへ。ブラジルの現代的スターの軌跡です。",
     { zoom: 13.6, pitch: 75, bearing: -42 }
   ),
 
@@ -987,8 +1143,8 @@ const scenes = [
     modric,
     "Modri\u0107 Route",
     { center: [5.5, 45], zoom: 3.5, pitch: 55, bearing: -16, duration: 4700 },
-    "Zadar, Zagreb, London, Madrid, and Milan chart the path of Croatia's midfield standard.",
-    "ザダル、ザグレブ、ロンドン、マドリード、ミラノ。クロアチアの司令塔が世界へ進んだ道です。",
+    "NK Zadar, Dinamo Zagreb, Tottenham Hotspur, Real Madrid, and AC Milan chart the path of Croatia's midfield standard.",
+    "NKザダル、ディナモ・ザグレブ、トッテナム・ホットスパー、レアル・マドリード、ACミラン。クロアチアの司令塔が世界へ進んだ道です。",
     { zoom: 14.0, pitch: 75, bearing: 32 }
   ),
 
@@ -997,8 +1153,8 @@ const scenes = [
     title: "Final Convergence",
     meta: bilingual(`Four final stadiums \u2192 ${finalVenue.name}`, `4つの最終スタジアム → ${finalVenue.name}`),
     description: bilingual(
-      "From Nu Stadium, Al-Awwal Park, Vila Belmiro, and San Siro, four legends make their way to New Jersey.",
-      "Nu Stadium、Al-Awwal Park、Kingdom Arena、San Siroから、4人のレジェンドがニュージャージーへ向かいます。"
+      "Nu Stadium, Al-Awwal Park, Vila Belmiro, and San Siro launch their final lines toward New Jersey together.",
+      "Nu Stadium、Al-Awwal Park、Vila Belmiro、San Siroから、4本の線が同時にニュージャージーへ向かいます。"
     ),
     camera: { center: [-26, 38], zoom: 1.7, pitch: 50, bearing: -42, duration: 5200 },
     popup: {
