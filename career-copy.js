@@ -41,8 +41,8 @@
   const finalConvergence = scenes.find((scene) => scene.id === "final-convergence");
   if (finalConvergence) {
     finalConvergence.description = bilingualLine(
-      "Nu Stadium, Al-Awwal Park, Vila Belmiro, and San Siro launch their final lines toward New Jersey together.",
-      "Nu Stadium、Al-Awwal Park、Vila Belmiro、San Siroから、4本の線が同時にニュージャージーへ向かいます。"
+      "From Nu Stadium, Al-Awwal Park, Vila Belmiro, and San Siro, four legends make their way to New Jersey.",
+      "Nu Stadium、Al-Awwal Park、Vila Belmiro、San Siroから、4人のレジェンドがにニュージャージーへ向かいます。"
     );
   }
 })();
