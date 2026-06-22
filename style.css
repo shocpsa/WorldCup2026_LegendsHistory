@@ -279,7 +279,7 @@ h1 {
 
 .controls {
   right: 28px;
-  bottom: 28px;
+  bottom: 56px;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -294,7 +294,7 @@ h1 {
 
 .is-finale .controls {
   right: 50%;
-  bottom: 26px;
+  bottom: 72px;
   transform: translateX(50%);
 }
 
@@ -486,10 +486,12 @@ button:disabled {
 .maplibregl-ctrl-bottom-left {
   left: auto;
   right: 12px;
-  bottom: 90px;
+  bottom: 8px;
+  max-width: calc(100vw - 24px);
 }
 
 .maplibregl-ctrl-attrib {
+  max-width: min(620px, calc(100vw - 24px));
   color: rgba(248, 245, 234, 0.76);
   background: rgba(0, 0, 0, 0.5);
 }
