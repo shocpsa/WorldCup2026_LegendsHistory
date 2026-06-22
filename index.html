@@ -12,7 +12,7 @@
       rel="stylesheet"
       href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css"
     />
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./style.css?v=2" />
   </head>
   <body>
     <main id="app">
@@ -55,6 +55,7 @@
 
       <div class="controls" aria-label="Story controls">
         <button id="start-button" type="button">Start / 開始</button>
+        <button id="pause-button" type="button" aria-pressed="false">Pause / 一時停止</button>
         <button id="replay-button" type="button">Replay / もう一度</button>
       </div>
 
@@ -74,6 +75,6 @@
 
     <script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
     <script src="./players.js?v=6"></script>
-    <script src="./script.js?v=2"></script>
+    <script src="./script.js?v=3"></script>
   </body>
 </html>
